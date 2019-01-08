@@ -8,12 +8,8 @@ const exec = require('child_process').exec;
 
 var gitVersion
 
-function execute(command, callback) {
-	exec(command, function(error,stdout,stderr){callback(stdout);});
-};
-
 module.exports.onGitWasPushed = async function() {
-	execute("cd raw_maps && git pull", (error, stdout, stderr) => {
+	child_process.exec("cd raw_maps && git pull", (error, stdout, stderr) => {
 		if (error) {
 			console.error(`exec error: $(error)`);
 			return
@@ -33,8 +29,14 @@ module.exports.onGitWasPushed = async function() {
 			reader.readAsBinaryString(file);
 		}
 		
-		child_process.execSync(`zip -r maps.zip *`, {
+		child_process.execSync(`zip -r public/maps.zip *`, {
 			cwd: "tmp_maps/"
+		});
+		
+		child_process.exec("rm -r tmp_maps", (error, stdout, stderr) => {
+			if (error) {
+				console.error(error)
+			}
 		});
 		
 		gitVersion = child_process.execSync("git rev-parse --verfiy HEAD")
@@ -46,7 +48,7 @@ module.exports.onGitWasPushed = async function() {
 	});
 }
 
-module.exports.getGitVersion() {
+module.exports.getVersion() {
 	if (gitVersion === null) {
 		var reader = new FileReader();
 		reader.onload = function(e) {
