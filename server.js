@@ -2,8 +2,15 @@
 
 require('make-promises-safe')
 const gitWorker = require('gitWorker');
-const fastify = require('fastify')();
 const path = require('path');
+const filesystem = require('fs');
+const fastify = require('fastify')({
+	https: {
+		key: filesystem.readFileSync(path.join(__dirname, 'file.key')),
+		cert: filesystem.readFileSync(path.join(__dirname, 'file.cert'))
+	}
+})
+
 
 fastify.register(require('fastify-static'), {
 	root: path.join(__dirname, 'public'),
