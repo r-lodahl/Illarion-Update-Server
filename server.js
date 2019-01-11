@@ -9,6 +9,10 @@ const fastify = require('fastify')({
 	}
 })
 
+process.on('uncaughtException', function(e) {
+	console.log(e);
+});
+
 fastify.register(require('fastify-static'), {
 	root: path.join(__dirname, 'public'),
 	prefix: '/public/'
@@ -64,12 +68,13 @@ fastify.post('/git/push/', opts, async(request,reply) => {
 const start = async () => {
 	try {
 		await fastify.listen(3000);
-		fastify.log.info(`server listening on $(fastify.server.address().port}`);
+		console.log(`server listening on ${fastify.server.address().port}`);
+		fastify.log.info(`server listening on ${fastify.server.address().port}`);
 	} catch (error) {
+		console.log(error);
 		fastify.log.error(error);
 		process.exit(1);
 	}
 }
 
-console.log('Server running at port 3000!');
 start();
