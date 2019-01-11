@@ -2,11 +2,13 @@ require('make-promises-safe');
 const filesystem = require('fs');
 const windows1252 = require('windows-1252');
 const glob = require('glob');
+const path = require('path');
 const exec = require('child_process').exec;
 
 var mapVersion
 
 module.exports.onGitWasPushed = async function() {
+	filesystem.mkdirSync(path.join(__dirname, "raw_maps"));
 	child_process.exec("cd raw_maps && git pull", (error, stdout, stderr) => {
 		if (error) {
 			console.error(`exec error: $(error)`);
@@ -18,7 +20,7 @@ module.exports.onGitWasPushed = async function() {
 		var reader = new FileReader();
 		for (file in fileList) {
 			reader.onload = function(e) {
-				filesystem.writeFile("tmp_maps/", windows1252.decode(reader.result), function(error) {
+				filesystem.writeFileSync("tmp_maps/", windows1252.decode(reader.result), function(error) {
 					if (error) {
 						return console.error(error);
 					}
@@ -31,11 +33,8 @@ module.exports.onGitWasPushed = async function() {
 			cwd: "tmp_maps/"
 		});
 		
-		child_process.exec("rm -r tmp_maps", (error, stdout, stderr) => {
-			if (error) {
-				console.error(error)
-			}
-		});
+		filesystem.rmdir(path.join(__dirname, "raw_maps"));
+		filesystem.rmdir(path.join(__dirname, "tmp_maps"));
 		
 		mapVersion = child_process.execSync("git rev-parse --verfiy HEAD")
 		filesystem.writeFile("map.version", mapVersion, function(error) {

@@ -28,6 +28,10 @@ fastify.register(require('fastify-basic-auth'), {
 	authenticate: true
 });
 
+fastify.register(require('fastify-jwt'), {
+	secret: filesystem.readFileSync(path.join(__dirname, 'secret.txt'))
+});
+
 async function validate(username, password, req, reply) {
 	if (username !== "A" && password !== "B") {
 		return new Error("Authentication failed. Please try again.");
@@ -35,18 +39,43 @@ async function validate(username, password, req, reply) {
 }
 
 fastify.after(() => {
-	fastify.addHook('preHandler', fastify.basicAuth);
-
-	fastify.get('/', async(request, reply) => {
-		return { alive: true };
+	fastify.route({
+		method: 'GET',
+		url: '/',
+		handler: async (request, reply) => {
+			return {alive: true};
+		}
 	});
 
-	fastify.get('/map/version/', async(request, reply) => {
-		return { version: mapWorker.getVersion() };
+	fastify.route({
+		method: 'GET',
+		url: '/map/version/',
+		preHandler: fastify.basicAuth,
+		handler: async (request, reply) => {
+			return {version:mapWorker.getVersion()};
+		}
 	});
 
-	fastify.get('/map/zipball/', async(request, reply) => {
-		return reply.sendFile('map.zip');
+	fastify.route({
+		method: 'GET',
+		url: '/map/zipball/',
+		preHandler: fastify.basicAuth,
+		handler: async (request, reply) => {
+			return reply.sendFile('map.zip');
+		}
+	});
+
+	fastify.route({
+		method: 'POST',
+		url: '/git/push/',
+		schema: {},
+		preHandler: verification.verifyGithubPayload;
+		handler: async (request, reply) => {
+			console.log("GIT PUSH");
+			console.log(request);
+			//mapWorker.onGitWasPushed();
+			return {success: true};
+		}
 	});
 });
 
@@ -59,11 +88,6 @@ const opts = {
 		}
 	}
 }
-
-fastify.post('/git/push/', opts, async(request,reply) => {
-	mapWorker.onGitWasPushed();
-	return {successful: true};
-});
 
 const start = async () => {
 	try {
