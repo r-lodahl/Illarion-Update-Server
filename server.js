@@ -1,16 +1,13 @@
-'use strict'
-
-require('make-promises-safe')
-const gitWorker = require('gitWorker');
+require('make-promises-safe');
+const mapWorker = require('./mapWorker.js');
 const path = require('path');
 const filesystem = require('fs');
 const fastify = require('fastify')({
 	https: {
-		key: filesystem.readFileSync(path.join(__dirname, 'file.key')),
-		cert: filesystem.readFileSync(path.join(__dirname, 'file.cert'))
+		key: filesystem.readFileSync(path.join(__dirname, '/key.pem')),
+		cert: filesystem.readFileSync(path.join(__dirname, '/cert.pem'))
 	}
 })
-
 
 fastify.register(require('fastify-static'), {
 	root: path.join(__dirname, 'public'),
@@ -34,23 +31,33 @@ async function validate(username, password, req, reply) {
 }
 
 fastify.after(() => {
-	fastify.addHook('preHandler' fastify.basicAuth);
+	fastify.addHook('preHandler', fastify.basicAuth);
 
 	fastify.get('/', async(request, reply) => {
 		return { alive: true };
 	});
 
 	fastify.get('/map/version/', async(request, reply) => {
-		return { version: gitWorker.getVersion() };
+		return { version: mapWorker.getVersion() };
 	});
 
-	fastify.get('/map/zipball/' async(request, reply) => {
+	fastify.get('/map/zipball/', async(request, reply) => {
 		return reply.sendFile('map.zip');
 	});
 });
 
-fastify.post('/git/push/', params, async(request,reply) => {
-	gitWorker.onGitWasPushed();
+const opts = {
+	schema: {
+		header: {
+			"X-GitHub-Event": {"type": "string"},
+			"X-GitHub-Delivery": {"type": "string"},
+			"X-Hub-Signature": {"type": "string"}
+		}
+	}
+}
+
+fastify.post('/git/push/', opts, async(request,reply) => {
+	mapWorker.onGitWasPushed();
 	return {successful: true};
 });
 
@@ -64,4 +71,5 @@ const start = async () => {
 	}
 }
 
+console.log('Server running at port 3000!');
 start();
