@@ -1,5 +1,6 @@
 require('make-promises-safe');
 const mapWorker = require('./mapWorker.js');
+//const verification = require('./verification.js');
 const path = require('path');
 const filesystem = require('fs');
 const fastify = require('fastify')({
@@ -7,7 +8,7 @@ const fastify = require('fastify')({
 		key: filesystem.readFileSync(path.join(__dirname, '/key.pem')),
 		cert: filesystem.readFileSync(path.join(__dirname, '/cert.pem'))
 	}
-})
+});
 
 process.on('uncaughtException', function(e) {
 	console.log(e);
@@ -26,10 +27,6 @@ fastify.register(require('fastify-rate-limit'), {
 fastify.register(require('fastify-basic-auth'), {
 	validate,
 	authenticate: true
-});
-
-fastify.register(require('fastify-jwt'), {
-	secret: filesystem.readFileSync(path.join(__dirname, 'secret.txt'))
 });
 
 async function validate(username, password, req, reply) {
@@ -66,8 +63,9 @@ fastify.after(() => {
 	});
 
 	fastify.route({
-		method: 'POST',
+		method: 'GET',
 		url: '/git/push/',
+		//preHandler: async (request, reply) => { return {a: true}; },
 		schema: {
 			headers: {
 				type: 'object',
@@ -79,14 +77,14 @@ fastify.after(() => {
 				required: ['x-github-event', 'x-github-delivery', 'x-hub-signature']
 			}
 		},
-		preHandler: verification.verifyGithubPayload;
 		handler: async (request, reply) => {
-			console.log("GIT PUSH");
-			console.log(request);
+			console.log("GIT PUSHL");
+			//console.log(request);
 			//mapWorker.onGitWasPushed();
 			return {success: true};
 		}
 	});
+
 });
 
 const start = async () => {
