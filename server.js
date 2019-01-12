@@ -68,7 +68,17 @@ fastify.after(() => {
 	fastify.route({
 		method: 'POST',
 		url: '/git/push/',
-		schema: {},
+		schema: {
+			headers: {
+				type: 'object',
+				properties: {
+					'x-github-event': { type: 'string' },
+					'x-github-delivery': { type: 'string' },
+					'x-hub-signature': { type: 'string' }
+				},
+				required: ['x-github-event', 'x-github-delivery', 'x-hub-signature']
+			}
+		},
 		preHandler: verification.verifyGithubPayload;
 		handler: async (request, reply) => {
 			console.log("GIT PUSH");
@@ -78,16 +88,6 @@ fastify.after(() => {
 		}
 	});
 });
-
-const opts = {
-	schema: {
-		header: {
-			"X-GitHub-Event": {"type": "string"},
-			"X-GitHub-Delivery": {"type": "string"},
-			"X-Hub-Signature": {"type": "string"}
-		}
-	}
-}
 
 const start = async () => {
 	try {
