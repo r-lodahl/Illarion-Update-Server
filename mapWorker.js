@@ -3,7 +3,7 @@ const filesystem = require('fs');
 const windows1252 = require('windows-1252');
 const glob = require('glob');
 const path = require('path');
-const exec = require('child_process').exec;
+const child_process = require('child_process');
 
 var mapVersion
 
@@ -15,18 +15,14 @@ module.exports.onGitWasPushed = async function() {
 			return
 		}
 		
-		var fileList = glob.sync("raw_maps/**/*.txt"); 
+		var fileList = glob.sync(path.join(__dirname,"raw_maps/**/*.txt"));
 		
-		var reader = new FileReader();
 		for (file in fileList) {
-			reader.onload = function(e) {
-				filesystem.writeFileSync("tmp_maps/", windows1252.decode(reader.result), function(error) {
-					if (error) {
-						return console.error(error);
-					}
-				});
-			};
-			reader.readAsBinaryString(file);
+			filesystem.writeFileSync(path.join(__dirname, path.basename(file)), windows1252.decode(filesystem.readFileSync(file).toString('binary')), function(error) {
+				if (error) {
+					return console.error(error);
+				}
+			});
 		}
 		
 		child_process.execSync(`zip -r public/maps.zip *`, {

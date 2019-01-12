@@ -1,6 +1,6 @@
 require('make-promises-safe');
 const mapWorker = require('./mapWorker.js');
-//const verification = require('./verification.js');
+const verification = require('./verification.js');
 const path = require('path');
 const filesystem = require('fs');
 const fastify = require('fastify')({
@@ -8,10 +8,6 @@ const fastify = require('fastify')({
 		key: filesystem.readFileSync(path.join(__dirname, '/key.pem')),
 		cert: filesystem.readFileSync(path.join(__dirname, '/cert.pem'))
 	}
-});
-
-process.on('uncaughtException', function(e) {
-	console.log(e);
 });
 
 fastify.register(require('fastify-static'), {
@@ -47,7 +43,7 @@ fastify.after(() => {
 	fastify.route({
 		method: 'GET',
 		url: '/map/version/',
-		preHandler: fastify.basicAuth,
+		beforeHandler: fastify.basicAuth,
 		handler: async (request, reply) => {
 			return {version:mapWorker.getVersion()};
 		}
@@ -56,16 +52,15 @@ fastify.after(() => {
 	fastify.route({
 		method: 'GET',
 		url: '/map/zipball/',
-		preHandler: fastify.basicAuth,
+		beforeHandler: fastify.basicAuth,
 		handler: async (request, reply) => {
 			return reply.sendFile('map.zip');
 		}
 	});
 
 	fastify.route({
-		method: 'GET',
+		method: 'POST',
 		url: '/git/push/',
-		//preHandler: async (request, reply) => { return {a: true}; },
 		schema: {
 			headers: {
 				type: 'object',
@@ -77,10 +72,9 @@ fastify.after(() => {
 				required: ['x-github-event', 'x-github-delivery', 'x-hub-signature']
 			}
 		},
+		beforeHandler: verification.verifyGithubPayload,
 		handler: async (request, reply) => {
-			console.log("GIT PUSHL");
-			//console.log(request);
-			//mapWorker.onGitWasPushed();
+			mapWorker.onGitWasPushed();
 			return {success: true};
 		}
 	});

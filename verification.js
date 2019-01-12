@@ -15,22 +15,24 @@ const createComparisonSignature = (body) => {
 const compareSignatures = (signature, comparisonSignature) => {
 	const source = Buffer.from(signature);
 	const comparison = Buffer.from(comparisonSignature);
+
+	if (source.length !== comparison.length) return false;
+
 	return crypto.timingSafeEqual(source, comparison);
 }
 
 module.exports.verifyGithubPayload = function(request, response, done) {
-	console.log("Am I called?");
 	const headers = request.headers;
 	const body = request.body;
 
 	const signature = headers['x-hub-signature'];
+	console.log(signature);
 	const comparisonSignature = createComparisonSignature(body);
+	console.log(comparisonSignature);
 
 	if (!compareSignatures(signature, comparisonSignature)) {
-		return reponse.status(401).send('Mismatched signatures.');
+		return response.status(401).send('Mismatched signatures.');
 	}
 
 	done();
 }
-
-//module.exports.verifyGithubPayload = verifyGithubPayload;
