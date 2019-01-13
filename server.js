@@ -34,18 +34,10 @@ async function validate(username, password, req, reply) {
 fastify.after(() => {
 	fastify.route({
 		method: 'GET',
-		url: '/',
-		handler: async (request, reply) => {
-			return {alive: true};
-		}
-	});
-
-	fastify.route({
-		method: 'GET',
 		url: '/map/version/',
 		beforeHandler: fastify.basicAuth,
 		handler: async (request, reply) => {
-			return {version:mapWorker.getVersion()};
+			return `{version: \"${mapWorker.getVersion()}\"}`;
 		}
 	});
 
@@ -54,7 +46,7 @@ fastify.after(() => {
 		url: '/map/zipball/',
 		beforeHandler: fastify.basicAuth,
 		handler: async (request, reply) => {
-			return reply.sendFile('map.zip');
+			return reply.sendFile('maps.zip');
 		}
 	});
 
