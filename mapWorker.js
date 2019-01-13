@@ -8,36 +8,27 @@ const child_process = require('child_process');
 var mapVersion
 
 module.exports.onGitWasPushed = async function() {
-	filesystem.mkdirSync(path.join(__dirname, "raw_maps"));
-	child_process.exec("cd raw_maps && git pull", (error, stdout, stderr) => {
-		if (error) {
-			console.error(`exec error: $(error)`);
-			return
-		}
-		
-		var fileList = glob.sync(path.join(__dirname,"raw_maps/**/*.txt"));
-		
-		for (file in fileList) {
-			filesystem.writeFileSync(path.join(__dirname, path.basename(file)), windows1252.decode(filesystem.readFileSync(file).toString('binary')), function(error) {
-				if (error) {
-					return console.error(error);
-				}
-			});
-		}
-		
-		child_process.execSync(`zip -r public/maps.zip *`, {
-			cwd: "tmp_maps/"
-		});
-		
-		filesystem.rmdir(path.join(__dirname, "raw_maps"));
-		filesystem.rmdir(path.join(__dirname, "tmp_maps"));
-		
-		mapVersion = child_process.execSync("git rev-parse --verfiy HEAD")
-		filesystem.writeFile("map.version", mapVersion, function(error) {
+	child_process.execSync("git pull", { cwd: path.join(__dirname, "raw_maps") });
+	var fileList = glob.sync(path.join(__dirname,"raw_maps/**/*.txt"));
+
+	filesystem.mkdirSync(path.join(__dirname, "tmp_maps"));
+	for (var i=0; i < fileList.length; i += 1) {
+		filesystem.writeFileSync(path.join(__dirname, "tmp_maps", path.basename(fileList[i])), windows1252.decode(filesystem.readFileSync(fileList[i]).toString('binary')), function(error) {
 			if (error) {
 				return console.error(error);
 			}
 		});
+	}
+		
+	child_process.execSync("zip -r ../public/maps.zip", { cwd: path.join(__dirname, "tmp_maps")});
+		
+	filesystem.rmdir(path.join(__dirname, "tmp_maps"));
+		
+	mapVersion = child_process.execSync("git rev-parse --verfiy HEAD", { cwd: path.join(__dirname, "raw_maps")});
+	filesystem.writeFile("map.version", mapVersion, function(error) {
+		if (error) {
+			return console.error(error);
+		}
 	});
 }
 

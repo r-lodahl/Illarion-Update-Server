@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const secret = fs.readFileSync(path.join(__dirname, '/secret.txt'));
+const secret = fs.readFileSync(path.join(__dirname, 'secret.key'));
 
 const createComparisonSignature = (body) => {
 	const hmac = crypto.createHmac('sha1', secret);
