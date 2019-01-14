@@ -35,7 +35,7 @@ fastify.after(() => {
 	fastify.route({
 		method: 'GET',
 		url: '/map/version/',
-		beforeHandler: fastify.basicAuth,
+		//beforeHandler: fastify.basicAuth,
 		handler: async (request, reply) => {
 			return `{version: \"${mapWorker.getVersion()}\"}`;
 		}
@@ -44,7 +44,7 @@ fastify.after(() => {
 	fastify.route({
 		method: 'GET',
 		url: '/map/zipball/',
-		beforeHandler: fastify.basicAuth,
+		//beforeHandler: fastify.basicAuth,
 		handler: async (request, reply) => {
 			return reply.sendFile('maps.zip');
 		}
