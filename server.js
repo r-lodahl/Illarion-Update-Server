@@ -37,7 +37,10 @@ fastify.after(() => {
 		url: '/map/version/',
 		//beforeHandler: fastify.basicAuth,
 		handler: async (request, reply) => {
-			return `{version: \"${mapWorker.getVersion()}\"}`;
+			reply
+			.code(200)
+			.header("Content-Type", "application/json; charset=utf-8")
+			.send(`{"version":"${mapWorker.getVersion()}"}`);
 		}
 	});
 
