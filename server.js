@@ -40,7 +40,7 @@ fastify.after(() => {
 			reply
 			.code(200)
 			.header("Content-Type", "application/json; charset=utf-8")
-			.send(`{"version":"${mapWorker.getVersion()}"}`);
+			.send({"version":`${mapWorker.getVersion()}`});
 		}
 	});
 
