@@ -34,7 +34,7 @@ async function validate(username, password, req, reply) {
 fastify.after(() => {
 	fastify.route({
 		method: 'GET',
-		url: '/map/version/',
+		url: '/api/map/version',
 		//beforeHandler: fastify.basicAuth,
 		handler: async (request, reply) => {
 			reply
@@ -46,7 +46,7 @@ fastify.after(() => {
 
 	fastify.route({
 		method: 'GET',
-		url: '/map/zipball/',
+		url: '/api/map/zipball',
 		//beforeHandler: fastify.basicAuth,
 		handler: async (request, reply) => {
 			return reply.sendFile('maps.zip');
@@ -55,7 +55,7 @@ fastify.after(() => {
 
 	fastify.route({
 		method: 'POST',
-		url: '/git/push/',
+		url: '/api/git/push',
 		schema: {
 			headers: {
 				type: 'object',
