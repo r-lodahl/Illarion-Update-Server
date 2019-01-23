@@ -15,11 +15,7 @@ module.exports.onGitWasPushed = async function() {
 	for (var i=0; i < fileList.length; i += 1) {
 		const writePath = path.join(__dirname, "tmp_maps", path.relative(path.join(__dirname, "raw_maps"), fileList[i]));
 		child_process.execSync(`mkdir -p "${path.dirname(writePath)}"`);
-		filesystem.writeFileSync(writePath, windows1252.decode(filesystem.readFileSync(fileList[i]).toString('binary')), function(error) {
-			if (error) {
-				return console.error(error);
-			}
-		});
+		filesystem.writeFileSync(writePath, windows1252.decode(filesystem.readFileSync(fileList[i]).toString('binary')), { encoding: "utf8" });
 	}
 	
 	child_process.execSync("zip -r ../public/maps.zip *", { cwd: path.join(__dirname, "tmp_maps")});
