@@ -55,7 +55,7 @@ fastify.after(() => {
 
 	fastify.route({
 		method: 'POST',
-		url: '/api/git/push',
+		url: '/api/git/mapupdate',
 		schema: {
 			headers: {
 				type: 'object',
