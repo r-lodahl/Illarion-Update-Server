@@ -2,7 +2,8 @@ cert.pem
 key.pem
 secret.key
 map.version
-/node_modules/
-/raw_maps/
-/public/
+node_modules
+raw_maps
+public
+.idea
 !.gitignore
