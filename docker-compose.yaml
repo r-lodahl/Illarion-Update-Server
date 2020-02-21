@@ -1,0 +1,26 @@
+version: "3"
+networks:
+  api_server_default:
+    external: true
+
+volumes:
+  illarion_shared:
+    external: true
+
+services:
+  illarion-update-server:
+    restart: unless-stopped
+    networks:
+      - api_server_default
+    volumes:
+      - illarion_shared
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+    - 3000:3000
+  illarion-resource-builder:
+    image:
+    restart: unless-stopped
+    volumes:
+      - illarion_shared

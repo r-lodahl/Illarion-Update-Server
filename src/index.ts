@@ -1,7 +1,10 @@
 import config from 'config';
 import { app } from './app';
+import {setupServer} from "./helper/first-time-setup";
 
 async function main(): Promise<void> {
+    await setupServer();
+
     const port = config.get('port');
     app.listen(port, () => {
         console.log(`Started listening on port ${port}`);

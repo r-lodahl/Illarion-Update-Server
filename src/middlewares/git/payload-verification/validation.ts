@@ -1,4 +1,4 @@
-import Yup from 'yup';
+import * as Yup from 'yup';
 
 interface GithubHeader {
     'x-github-event': string;
