@@ -5,6 +5,7 @@ map.version
 node_modules
 raw_maps
 public
+dist
 /git
 config/default.json
 .idea
